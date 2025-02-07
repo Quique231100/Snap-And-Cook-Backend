@@ -9,4 +9,4 @@ app.listen(PORT);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(userRoutes);
-console.log("Server corriendo en el puerto", PORT);
+console.log("Server corriendo en el puerto ", PORT);
