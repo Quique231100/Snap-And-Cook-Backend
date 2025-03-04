@@ -1,4 +1,5 @@
 import { pool } from "../db.js";
+import bcrypt from "bcryptjs";
 
 export const getUsers = async (req, res) => {
   const { rows } = await pool.query("SELECT * FROM usuarios WHERE status = 1");
@@ -45,14 +46,24 @@ export const signIn = async (req, res) => {
 //Cambiar nombre de función a signUp
 export const addUser = async (req, res) => {
   try {
-    const data = req.body; //Inserción de los datos
+    const data = req.body;
+
+    // Validación básica (puedes usar una librería como Joi para hacerlo más robusto)
+    if (!data.nombre || !data.apellidos || !data.correo || !data.contrasena) {
+      return res.status(400).json({ message: "Faltan campos obligatorios" });
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await bcrypt.hash(data.contrasena, 10);
+
+    // Inserción de los datos en la base de datos
     const { rows } = await pool.query(
       "INSERT INTO usuarios (status, nombre, apellidos, correo, contrasena, sexo, edad, estatura, peso, enfermedades, alergias) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
       [
         data.nombre,
         data.apellidos,
         data.correo,
-        data.contrasena,
+        hashedPassword, // Guarda la contraseña hasheada
         data.sexo,
         data.edad,
         data.estatura,
@@ -61,14 +72,24 @@ export const addUser = async (req, res) => {
         data.alergias,
       ]
     );
+
     console.log(rows);
-    res.status(201).json({ message: "Usuarios agregado correctamente" });
-  } catch (e) {
-    console.log(e);
-    if (error?.code === "23505") {
-      return res.status(409).json({ message: "Email ya está en uso" });
+    res
+      .status(201)
+      .json({ message: "Usuario registrado correctamente", user: rows[0] });
+  } catch (error) {
+    console.error(error);
+
+    if (error.code === "23505") {
+      return res
+        .status(409)
+        .json({ message: "El correo electrónico ya está en uso" });
     }
-    return res.status(500).json({ message: "Error en el servidor" });
+
+    res.status(500).json({
+      message: "Error en el servidor",
+      error: process.env.NODE_ENV === "development" ? error.message : null,
+    });
   }
 };
 
