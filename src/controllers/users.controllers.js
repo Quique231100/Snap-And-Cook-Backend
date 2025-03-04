@@ -44,7 +44,7 @@ export const signIn = async (req, res) => {
 };
 
 //Cambiar nombre de función a signUp
-export const addUser = async (req, res) => {
+export const signUp = async (req, res) => {
   try {
     const data = req.body;
 

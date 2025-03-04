@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  addUser,
   deleteUser,
   getUserById,
   getUsers,
   signIn,
+  signUp,
   updateUser,
 } from "../controllers/users.controllers.js";
 
@@ -19,8 +19,8 @@ router.get("/users/:id", getUserById);
 //Ruta para iniciar sesion
 router.post("/users/sign-in", signIn);
 
-//Ruta para agregar a un usuario
-router.post("/users", addUser);
+//Ruta para registrarse
+router.post("/users/sign-up", signUp);
 
 //Eliminicación lógica de datos, cambiando el status del usuario a 0
 router.patch("/users/:id/delete", deleteUser);
